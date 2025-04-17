@@ -13,10 +13,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.lread.data.model.getSampleBooks
 import com.example.lread.ui.screens.book.BookScreen
 import com.example.lread.ui.screens.library.LibraryScreen
 import com.example.lread.ui.theme.LReadTheme
-import com.example.lread.R
 import java.net.URLEncoder
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -40,32 +40,29 @@ class MainActivity : ComponentActivity() {
                         composable("library") {
                             LibraryScreen(
                                 onBookClick = { book ->
-                                    val encodedTitle = URLEncoder.encode(book.title, StandardCharsets.UTF_8.toString())
-                                    val encodedAuthor = URLEncoder.encode(book.author, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("book/$encodedTitle/$encodedAuthor")
+                                    val encodedId = URLEncoder.encode(book.id, StandardCharsets.UTF_8.toString())
+                                    navController.navigate("book/$encodedId")
                                 }
                             )
                         }
 
                         composable(
-                            route = "book/{title}/{author}",
+                            route = "book/{id}",
                             arguments = listOf(
-                                navArgument("title") { type = NavType.StringType },
-                                navArgument("author") { type = NavType.StringType }
+                                navArgument("id") { type = NavType.StringType }
                             )
                         ) { backStackEntry ->
-                            val encodedTitle = backStackEntry.arguments?.getString("title") ?: ""
-                            val encodedAuthor = backStackEntry.arguments?.getString("author") ?: ""
-                            val title = URLDecoder.decode(encodedTitle, StandardCharsets.UTF_8.toString())
-                            val author = URLDecoder.decode(encodedAuthor, StandardCharsets.UTF_8.toString())
+                            val encodedId = backStackEntry.arguments?.getString("id") ?: ""
+                            val id = URLDecoder.decode(encodedId, StandardCharsets.UTF_8.toString())
 
-                            // 🖼 For now, pass a default cover or map dynamically if needed
-                            BookScreen(
-                                navController = navController,
-                                title = title,
-                                author = author,
-                                coverResId = R.drawable.later_by_stephen_king
-                            )
+                            val book = getSampleBooks().find { it.id == id }
+
+                            if (book != null) {
+                                BookScreen(
+                                    navController = navController,
+                                    book = book
+                                )
+                            }
                         }
                     }
                 }
