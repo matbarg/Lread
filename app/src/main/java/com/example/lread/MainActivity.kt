@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.lread.ui.screens.reader.ReaderScreen
 import com.example.lread.ui.theme.LReadTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +20,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             LReadTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ReaderScreen(modifier = Modifier.padding(innerPadding))
+                    Greeting(
+                        name = "Android",
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
