@@ -35,6 +35,30 @@ fun getSampleBooks(): List<Book> {
                 "animal-farm/ch04.xhtml",
                 "animal-farm/ch05.xhtml"
             )
+        ),
+        Book(
+            id = "book3",
+            title = "Die Verwandlung",
+            author = "Franz Kafka",
+            cover = "metamorphosis/epubbooks-cover.jpg",
+            chapters = listOf(
+                "metamorphosis/ch01.xhtml",
+                "metamorphosis/ch02.xhtml",
+                "metamorphosis/ch03.xhtml",
+            )
+        ),
+        Book(
+            id = "book4",
+            title = "Spurlos verschwunden",
+            author = "Paul Pilkington",
+            cover = "spurlos/book-1-longgone_spurlos-verschwunden.jpg",
+            chapters = listOf(
+                "spurlos/part-001-chapter-001.xhtml",
+                "spurlos/part-001-chapter-002.xhtml",
+                "spurlos/part-001-chapter-003.xhtml",
+                "spurlos/part-001-chapter-004.xhtml",
+                "spurlos/part-001-chapter-005.xhtml"
+            )
         )
     )
 }
