@@ -12,8 +12,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.lread.ui.screens.reader.ReaderScreen
+import com.example.lread.ui.theme.LReadTheme
 
 @Composable
 fun BookScreen(
