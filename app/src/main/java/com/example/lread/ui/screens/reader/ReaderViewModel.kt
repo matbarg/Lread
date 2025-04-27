@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class ReaderViewModel() : ViewModel() {
-    private val _uiState = MutableStateFlow(ReaderScreenState(book = getSampleBooks()[0], currentChapter = 0))
+    private val _uiState =
+        MutableStateFlow(ReaderScreenState(book = getSampleBooks()[0], currentChapter = 0))
     val uiState: StateFlow<ReaderScreenState> = _uiState.asStateFlow()
 
     fun setFontSize(size: Int) {
@@ -27,5 +28,10 @@ class ReaderViewModel() : ViewModel() {
         } else {
             // end of book
         }
+    }
+
+    fun setCurrentAnchorId(anchorId: String) {
+        println("New anchor id: $anchorId")
+        _uiState.update { it.copy(currentAnchorId = anchorId) }
     }
 }
