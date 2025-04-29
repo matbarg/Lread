@@ -17,10 +17,12 @@ import com.example.lread.data.model.getSampleBooks
 import com.example.lread.ui.screens.book.BookScreen
 import com.example.lread.ui.screens.library.LibraryScreen
 import com.example.lread.ui.theme.LReadTheme
+import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

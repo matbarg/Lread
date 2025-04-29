@@ -8,6 +8,7 @@ class ReaderWebViewClient(
     private val getJsStyles: () -> String,
     private val getCurrentAnchorId: () -> String
 ) : WebViewClient() {
+    private var readerIsFirstOpened = true
 
     private val addIdsJs = """
             (function() {
@@ -83,7 +84,10 @@ class ReaderWebViewClient(
 
         view?.evaluateJavascript(getJsStyles(), null)
 
-        view?.evaluateJavascript(scrollToParagraphJs, null)
+        if (readerIsFirstOpened) {
+            view?.evaluateJavascript(scrollToParagraphJs, null)
+            readerIsFirstOpened = false
+        }
 
         view?.evaluateJavascript(reportAnchorJs, null)
     }
