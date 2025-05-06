@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.BookProgress
+import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.getSampleBooks
 import com.example.lread.data.repository.BookProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,7 +40,7 @@ class ReaderViewModel @Inject constructor(
             getSampleBooks()[0] // todo: viewmodel is passed the bookId to get the correct book
 
         viewModelScope.launch {
-            val progress = bookProgressRepository.getBookProgress("book1")
+            val progress = bookProgressRepository.getBookProgress(book.id)
 
             _uiState.value = ReaderScreenState(
                 book = book,
@@ -52,8 +53,13 @@ class ReaderViewModel @Inject constructor(
         }
     }
 
-    fun setFontSize(size: Int) {
-        _uiState.update { it.copy(fontSize = size) }
+    fun setTextSize(textSize: TextSize) {
+        _uiState.update { it.copy(textSize = textSize) }
+    }
+
+    fun setCurrentChapter(chapter: Int) {
+        // todo: maybe include check if the parameter isn't greater than the total chapters
+        _uiState.update { it.copy(currentChapter = chapter) }
     }
 
     fun goToNextChapter() {
@@ -88,5 +94,9 @@ class ReaderViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun toggleSettings() {
+        _uiState.update { it.copy(settingsExpanded = !_uiState.value.settingsExpanded) }
     }
 }
