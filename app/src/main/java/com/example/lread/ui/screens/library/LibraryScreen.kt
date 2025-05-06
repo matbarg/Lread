@@ -2,44 +2,36 @@
 
 package com.example.lread.ui.screens.library
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.getSampleBooks
 
 @Composable
 fun LibraryScreen(
-    onBookClick: (Book) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: LibraryViewModel = viewModel(),
+    onBookClick: (Book) -> Unit
 ) {
     val originalBooks = remember { getSampleBooks() }
     var books by remember { mutableStateOf(originalBooks) }
     var isSortedAlphabetically by remember { mutableStateOf(false) }
-
-    // State to track favorite books by ID
-    val favoriteIds = remember { mutableStateListOf<String>() }
 
     Box(
         modifier = modifier
@@ -75,7 +67,6 @@ fun LibraryScreen(
                 }
             }
 
-            // 🖼 Book Grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(12.dp),
@@ -84,15 +75,12 @@ fun LibraryScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(books) { book ->
-                    val isFavorite = favoriteIds.contains(book.id)
+                    val isFavorite = viewModel.favoriteIds.contains(book.id)
                     BookCard(
                         book = book,
                         isFavorite = isFavorite,
                         onClick = { onBookClick(book) },
-                        onLongClick = {
-                            if (isFavorite) favoriteIds.remove(book.id)
-                            else favoriteIds.add(book.id)
-                        }
+                        onLongPress = { viewModel.toggleFavorite(book.id) }
                     )
                 }
             }
@@ -105,14 +93,14 @@ fun BookCard(
     book: Book,
     isFavorite: Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongPress: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .width(160.dp)
             .combinedClickable(
                 onClick = onClick,
-                onLongClick = onLongClick
+                onLongClick = onLongPress
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -135,11 +123,12 @@ fun BookCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(6.dp)
-                        .size(22.dp)
-                        .background(Color.Red, CircleShape),
+                        .size(24.dp)
+                        .background(Color.Red, CircleShape)
+                        .border(2.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("★", fontSize = 12.sp, color = Color.White)
+                    Text("★", fontSize = 14.sp, color = Color.White)
                 }
             }
         }
