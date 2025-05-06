@@ -1,5 +1,6 @@
 package com.example.lread.utils
 
+import android.graphics.Bitmap
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
@@ -18,6 +19,22 @@ class ReaderWebViewClient(
                 }
             })();
         """.trimIndent()
+
+    private val addSpacing = """
+        document.body.style.paddingTop = '80px';
+        document.body.style.paddingBottom = '80px';
+    """.trimIndent()
+
+    private val addFontFamilies = """
+        const fontFamilyStyle = document.createElement('style');
+        fontFamilyStyle.textContent = `
+            @font-face {
+                font-family: 'LibreBaskerville';
+                src: url('file:///android_asset/fonts/librebaskerville_regular.ttf');
+            }
+        `;
+        document.head.appendChild(fontFamilyStyle);
+    """.trimIndent()
 
     private val scrollToParagraphJs = """
             const el = document.getElementById('${getCurrentAnchorId()}');
@@ -81,6 +98,10 @@ class ReaderWebViewClient(
         super.onPageFinished(view, url)
 
         view?.evaluateJavascript(addIdsJs, null)
+
+        view?.evaluateJavascript(addSpacing, null)
+
+        view?.evaluateJavascript(addFontFamilies, null)
 
         view?.evaluateJavascript(getJsStyles(), null)
 

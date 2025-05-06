@@ -1,5 +1,6 @@
 package com.example.lread.ui.screens.reader
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -97,6 +98,7 @@ class ReaderViewModel @Inject constructor(
     }
 
     fun toggleSettings() {
+        Log.d("", "Settings where toggled")
         _uiState.update { it.copy(settingsExpanded = !_uiState.value.settingsExpanded) }
     }
 }

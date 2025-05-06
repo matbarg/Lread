@@ -18,12 +18,14 @@ data class ReaderScreenState(
     val currentAnchorId: String = "para-0", // starting anchor/paragraph
     val textSize: TextSize = TextSize.MEDIUM,
     val lineSpacing: Int = 100, // percent
-    val settingsExpanded: Boolean = false
+    val settingsExpanded: Boolean = false,
 ) {
     val currentChapterURL = "file:///android_asset/${book.chapters.getOrNull(currentChapter)}"
 
     val currentStylesScript = """
+        document.body.style.fontFamily = 'LibreBaskerville';
         document.body.style.fontSize = '${textSize.size}px';
+        document.body.style.lineHeight = '1.5';
     """.trimIndent()
 
     val bottomBarHeight = if (settingsExpanded) 50.dp else 400.dp
