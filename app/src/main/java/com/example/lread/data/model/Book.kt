@@ -5,8 +5,10 @@ data class Book(
     val title: String,
     val author: String,
     val cover: String,
-    val chapters: List<String>
+    val chapters: List<String>,
+    val isFavorite: Boolean = false // ➕ HINZUGEFÜGT
 )
+
 
 fun getSampleBooks(): List<Book> {
     return listOf(
