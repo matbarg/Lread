@@ -23,6 +23,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.getSampleBooks
 
+enum class SortType { TITLE, AUTHOR, FAVORITES }
+
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
@@ -30,8 +32,18 @@ fun LibraryScreen(
     onBookClick: (Book) -> Unit
 ) {
     val originalBooks = remember { getSampleBooks() }
-    var books by remember { mutableStateOf(originalBooks) }
-    var isSortedAlphabetically by remember { mutableStateOf(false) }
+    var sortType by remember { mutableStateOf(SortType.TITLE) }
+    val favoriteIds = viewModel.favoriteIds
+
+    val books = remember(sortType, favoriteIds) {
+        when (sortType) {
+            SortType.TITLE -> originalBooks.sortedBy { it.title }
+            SortType.AUTHOR -> originalBooks.sortedBy { it.author }
+            SortType.FAVORITES -> originalBooks.sortedByDescending { favoriteIds.contains(it.id) }
+        }
+    }
+
+    var dropdownExpanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -55,15 +67,28 @@ fun LibraryScreen(
                     Icon(Icons.Default.Add, contentDescription = "Add Book")
                 }
 
-                TextButton(onClick = {
-                    isSortedAlphabetically = !isSortedAlphabetically
-                    books = if (isSortedAlphabetically) {
-                        books.sortedBy { it.title }
-                    } else {
-                        originalBooks
+                Box {
+                    TextButton(onClick = { dropdownExpanded = true }) {
+                        Text("Sort by ${sortType.name.lowercase().replaceFirstChar { it.uppercase() }} ▼")
                     }
-                }) {
-                    Text(if (isSortedAlphabetically) "Sorted" else "Sort Alphabetically")
+
+                    DropdownMenu(
+                        expanded = dropdownExpanded,
+                        onDismissRequest = { dropdownExpanded = false }
+                    ) {
+                        DropdownMenuItem(text = { Text("Title") }, onClick = {
+                            sortType = SortType.TITLE
+                            dropdownExpanded = false
+                        })
+                        DropdownMenuItem(text = { Text("Author") }, onClick = {
+                            sortType = SortType.AUTHOR
+                            dropdownExpanded = false
+                        })
+                        DropdownMenuItem(text = { Text("Favorites") }, onClick = {
+                            sortType = SortType.FAVORITES
+                            dropdownExpanded = false
+                        })
+                    }
                 }
             }
 
@@ -75,10 +100,9 @@ fun LibraryScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(books) { book ->
-                    val isFavorite = viewModel.favoriteIds.contains(book.id)
                     BookCard(
                         book = book,
-                        isFavorite = isFavorite,
+                        isFavorite = favoriteIds.contains(book.id),
                         onClick = { onBookClick(book) },
                         onLongPress = { viewModel.toggleFavorite(book.id) }
                     )
@@ -123,12 +147,12 @@ fun BookCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(6.dp)
-                        .size(24.dp)
+                        .size(26.dp)
                         .background(Color.Red, CircleShape)
                         .border(2.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("★", fontSize = 14.sp, color = Color.White)
+                    Text("★", fontSize = 16.sp, color = Color.White)
                 }
             }
         }
