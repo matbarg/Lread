@@ -45,10 +45,7 @@ class ReaderViewModel @Inject constructor(
      *
      * updates the screen state correspondingly
      */
-    fun initializeReaderState() {
-        val book: Book =
-            getSampleBooks()[0] // todo: viewmodel is passed the bookId to get the correct book
-
+    fun initializeReaderState(book: Book) {
         viewModelScope.launch {
             val progress = bookProgressRepository.getBookProgress(book.id)
 

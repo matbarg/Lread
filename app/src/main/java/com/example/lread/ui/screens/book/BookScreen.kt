@@ -18,12 +18,16 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.ui.draw.shadow
+import com.example.lread.ui.navigation.Screen
 
 
 @Composable
 fun BookScreen(
     navController: NavController,
-    book: Book
+    book: Book,
+    modifier: Modifier = Modifier
 ) {
     var readingProgress by remember { mutableStateOf(0.2f) } // 20% gelesen (später dynamisch machen)
 
@@ -100,6 +104,32 @@ fun BookScreen(
                     .background(Color(0xFFFFECB3), RoundedCornerShape(8.dp))
                     .padding(12.dp)
             )
+        }
+
+        Button(
+            modifier = modifier.shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp)),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
+            colors = ButtonColors(
+                containerColor = Color.Blue,
+                contentColor = Color.White,
+                disabledContainerColor = Color.Green,
+                disabledContentColor = Color.Yellow
+            ),
+            shape = RoundedCornerShape(16.dp),
+            onClick = {
+                navController.navigate(Screen.ReaderScreen.createRoute(bookid = book.id))
+            }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text("Continue Reading")
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Continue Reading"
+                )
+            }
         }
 
     }

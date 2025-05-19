@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
+import com.example.lread.data.model.Book
+import com.example.lread.data.model.getSampleBooks
 import com.example.lread.ui.theme.LReadTheme
 import com.example.lread.utils.ReaderJsBridge
 import com.example.lread.utils.ReaderWebViewClient
@@ -51,11 +54,12 @@ import com.example.lread.utils.ReaderWebViewClient
 @Composable
 fun ReaderScreen(
     modifier: Modifier = Modifier,
+    navController: NavController,
     viewModel: ReaderViewModel = hiltViewModel(),
-    bookId: String = "book1"
+    book: Book = getSampleBooks()[0]
 ) {
     // pass the bookId to the viewModel so it can fetch reading progress and initialize state
-    viewModel.initializeReaderState()
+    viewModel.initializeReaderState(book = book)
 
     val uiState = viewModel.uiState.collectAsState()
 
@@ -289,13 +293,5 @@ fun ReaderScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ReaderScreenPreview() {
-    LReadTheme {
-        ReaderScreen()
     }
 }

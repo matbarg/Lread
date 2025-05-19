@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.lread.data.model.getSampleBooks
+import com.example.lread.ui.navigation.Navigation
 import com.example.lread.ui.screens.book.BookScreen
 import com.example.lread.ui.screens.library.LibraryScreen
 import com.example.lread.ui.theme.LReadTheme
@@ -30,44 +31,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LReadTheme {
-                val navController = rememberNavController()
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "library",
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-
-                        composable("library") {
-                            LibraryScreen(
-                                onBookClick = { book ->
-                                    val encodedId = URLEncoder.encode(book.id, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("book/$encodedId")
-                                }
-                            )
-                        }
-
-                        composable(
-                            route = "book/{id}",
-                            arguments = listOf(
-                                navArgument("id") { type = NavType.StringType }
-                            )
-                        ) { backStackEntry ->
-                            val encodedId = backStackEntry.arguments?.getString("id") ?: ""
-                            val id = URLDecoder.decode(encodedId, StandardCharsets.UTF_8.toString())
-
-                            val book = getSampleBooks().find { it.id == id }
-
-                            if (book != null) {
-                                BookScreen(
-                                    navController = navController,
-                                    book = book
-                                )
-                            }
-                        }
-                    }
-                }
+                Navigation()
             }
         }
     }
