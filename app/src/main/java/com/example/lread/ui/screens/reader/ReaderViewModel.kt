@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.BookProgress
 import com.example.lread.data.model.TextSize
+import com.example.lread.data.model.TextSpacing
+import com.example.lread.data.model.TextTheme
 import com.example.lread.data.model.getSampleBooks
 import com.example.lread.data.repository.BookProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,12 +32,19 @@ class ReaderViewModel @Inject constructor(
 
     val loadingInProgress = mutableStateOf(true)
 
-    // progress is saved whenever the app stops (becomes invisible) or when going to the next chapter
+    // progress is saved whenever the app stops (becomes invisible) or when going to the next chapter (in goToNextChapter())
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
         saveReadingProgress()
     }
 
+    /**
+     * Uses the bookId passed to the ReaderScreen to:
+     * access the Book object from the sample books
+     * load the BookProgress from the db
+     *
+     * updates the screen state correspondingly
+     */
     fun initializeReaderState() {
         val book: Book =
             getSampleBooks()[0] // todo: viewmodel is passed the bookId to get the correct book
@@ -58,9 +67,17 @@ class ReaderViewModel @Inject constructor(
         _uiState.update { it.copy(textSize = textSize) }
     }
 
+    fun setTextSpacing(textSpacing: TextSpacing) {
+        _uiState.update { it.copy(textSpacing = textSpacing) }
+    }
+
+    fun setTextTheme(textTheme: TextTheme) {
+        _uiState.update { it.copy(textTheme = textTheme) }
+    }
+
     fun setCurrentChapter(chapter: Int) {
         // todo: maybe include check if the parameter isn't greater than the total chapters
-        _uiState.update { it.copy(currentChapter = chapter) }
+        _uiState.update { it.copy(currentChapter = chapter, nextButtonVisible = false, settingsVisible = false) }
     }
 
     fun goToNextChapter() {
@@ -69,7 +86,13 @@ class ReaderViewModel @Inject constructor(
 
         if (currentChapterIndex < lastChapterIndex) {
             _uiState.update {
-                it.copy(currentChapter = currentChapterIndex + 1, currentAnchorId = "")
+                it.copy(
+                    currentChapter = currentChapterIndex + 1,
+                    currentAnchorId = "",
+                    settingsVisible = false,
+                    topBarVisible = true,
+                    nextButtonVisible = false
+                )
             }
         } else {
             // end of book
@@ -99,6 +122,14 @@ class ReaderViewModel @Inject constructor(
 
     fun toggleSettings() {
         Log.d("", "Settings where toggled")
-        _uiState.update { it.copy(settingsExpanded = !_uiState.value.settingsExpanded) }
+        _uiState.update { it.copy(settingsVisible = !_uiState.value.settingsVisible) }
+    }
+
+    fun setTopBarVisible(isVisible: Boolean) {
+        _uiState.update { it.copy(topBarVisible = isVisible) }
+    }
+
+    fun setNextButtonVisible(isVisible: Boolean) {
+        _uiState.update { it.copy(nextButtonVisible = isVisible) }
     }
 }

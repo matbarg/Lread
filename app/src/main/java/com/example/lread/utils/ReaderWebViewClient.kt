@@ -21,8 +21,7 @@ class ReaderWebViewClient(
         """.trimIndent()
 
     private val addSpacing = """
-        document.body.style.paddingTop = '80px';
-        document.body.style.paddingBottom = '80px';
+        document.body.style.padding = '80px 16px 200px';
     """.trimIndent()
 
     private val addFontFamilies = """
