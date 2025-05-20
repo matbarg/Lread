@@ -20,7 +20,7 @@ import com.example.lread.data.model.Book
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.ui.draw.shadow
-import com.example.lread.ui.navigation.Screen
+import com.example.lread.ui.navigation.NavRoute
 
 
 @Composable
@@ -117,7 +117,7 @@ fun BookScreen(
             ),
             shape = RoundedCornerShape(16.dp),
             onClick = {
-                navController.navigate(Screen.ReaderScreen.createRoute(bookid = book.id))
+                navController.navigate(NavRoute.ReaderScreen(bookId = book.id))
             }
         ) {
             Row(

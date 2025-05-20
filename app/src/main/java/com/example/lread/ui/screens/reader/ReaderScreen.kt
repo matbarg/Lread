@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -46,7 +47,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.lread.data.model.Book
-import com.example.lread.data.model.getSampleBooks
 import com.example.lread.ui.theme.LReadTheme
 import com.example.lread.utils.ReaderJsBridge
 import com.example.lread.utils.ReaderWebViewClient
@@ -56,11 +56,8 @@ fun ReaderScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: ReaderViewModel = hiltViewModel(),
-    book: Book = getSampleBooks()[0]
+    bookId: String
 ) {
-    // pass the bookId to the viewModel so it can fetch reading progress and initialize state
-    viewModel.initializeReaderState(book = book)
-
     val uiState = viewModel.uiState.collectAsState()
 
     val lifeCycleOwner = LocalLifecycleOwner.current
@@ -144,12 +141,12 @@ fun ReaderScreen(
                     }
                 )
             } else {
-                Text("Loading...")
+                CircularProgressIndicator(modifier = modifier.align(Alignment.Center))
             }
 
             /**
              * Top bar:
-             * It's not the Scaffolds topBar directly because it acts more as an overlay
+             * (It's not the Scaffolds topBar directly because it acts more as an overlay)
              */
             val topBackgroundColor = animateColorAsState(
                 targetValue = if (uiState.value.topBarVisible) color1 else Color(0x007BA3FF),
@@ -169,7 +166,8 @@ fun ReaderScreen(
                         .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
                         .background(color2),
-                    onClick = {}) {
+                    onClick = { navController.popBackStack() }
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",

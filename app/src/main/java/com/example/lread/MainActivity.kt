@@ -13,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.lread.data.model.getSampleBooks
 import com.example.lread.ui.navigation.Navigation
 import com.example.lread.ui.screens.book.BookScreen
 import com.example.lread.ui.screens.library.LibraryScreen

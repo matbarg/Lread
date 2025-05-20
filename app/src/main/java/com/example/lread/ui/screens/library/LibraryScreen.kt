@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
-import com.example.lread.data.model.getSampleBooks
+import com.example.lread.data.model.sampleBooks
 
 enum class SortType { TITLE, AUTHOR, FAVORITES }
 
@@ -31,7 +31,7 @@ fun LibraryScreen(
     viewModel: LibraryViewModel = viewModel(),
     onBookClick: (Book) -> Unit
 ) {
-    val originalBooks = remember { getSampleBooks() }
+    val originalBooks = remember { sampleBooks.values.toList() }
     var sortType by remember { mutableStateOf(SortType.TITLE) }
     val favoriteIds = viewModel.favoriteIds
 

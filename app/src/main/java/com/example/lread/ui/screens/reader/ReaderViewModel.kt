@@ -4,15 +4,18 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.BookProgress
 import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
-import com.example.lread.data.model.getSampleBooks
+import com.example.lread.data.model.sampleBooks
 import com.example.lread.data.repository.BookProgressRepository
+import com.example.lread.ui.navigation.NavRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,14 +26,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val bookProgressRepository: BookProgressRepository
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _uiState =
         MutableStateFlow(ReaderScreenState())
+
     val uiState: StateFlow<ReaderScreenState> = _uiState.asStateFlow()
 
     val loadingInProgress = mutableStateOf(true)
+
+    init {
+        val args = savedStateHandle.toRoute<NavRoute.ReaderScreen>()
+
+        initializeReaderState(args.bookId, args.chapter)
+    }
 
     // progress is saved whenever the app stops (becomes invisible) or when going to the next chapter (in goToNextChapter())
     override fun onStop(owner: LifecycleOwner) {
@@ -39,21 +50,34 @@ class ReaderViewModel @Inject constructor(
     }
 
     /**
-     * Uses the bookId passed to the ReaderScreen to:
+     * Uses the arguments passed to the ReaderScreen to:
      * access the Book object from the sample books
-     * load the BookProgress from the db
+     * either open the specified chapter or load the BookProgress from the db
      *
      * updates the screen state correspondingly
      */
-    fun initializeReaderState(book: Book) {
-        viewModelScope.launch {
-            val progress = bookProgressRepository.getBookProgress(book.id)
+    private fun initializeReaderState(bookId: String, chapter: Int?) {
+        //val book = getSampleBooks().find { it.id == bookId }
+        val book = sampleBooks[bookId]
 
+        if (chapter == null) { // no chapter was passed => restore book progress or start from the beginning
+            viewModelScope.launch {
+                val progress = bookProgressRepository.getBookProgress(book!!.id)
+
+                _uiState.value = ReaderScreenState(
+                    book = book,
+                    currentChapter = progress?.currentChapter ?: 0, // default starting chapter
+                    currentAnchorId = progress?.currentAnchorId
+                        ?: "" // default starting anchor (no scroll)
+                )
+
+                loadingInProgress.value = false
+            }
+        } else { // chapter was passed => initialize state with it
             _uiState.value = ReaderScreenState(
-                book = book,
-                currentChapter = progress?.currentChapter ?: 0, // default starting chapter
-                currentAnchorId = progress?.currentAnchorId
-                    ?: "" // default starting anchor (no scroll)
+                book = book!!,
+                currentChapter = chapter,
+                currentAnchorId = "" // no scroll
             )
 
             loadingInProgress.value = false
