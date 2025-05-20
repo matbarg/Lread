@@ -31,6 +31,14 @@ class ReaderWebViewClient(
                 font-family: 'LibreBaskerville';
                 src: url('file:///android_asset/fonts/librebaskerville_regular.ttf');
             }
+            @font-face {
+                font-family: 'Lato';
+                src: url('file:///android_asset/fonts/lato_regular.ttf');
+            }
+            @font-face {
+                font-family: 'Sanchez';
+                src: url('file:///android_asset/fonts/sanchez_regular.ttf');
+            }
         `;
         document.head.appendChild(fontFamilyStyle);
     """.trimIndent()

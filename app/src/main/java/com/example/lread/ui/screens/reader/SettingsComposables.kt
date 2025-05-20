@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
@@ -121,6 +122,34 @@ fun TextThemeDropdown(
                 text = { Text(it.label) },
                 onClick = {
                     setTextTheme(it)
+                    expanded.value = false
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun TextFontDropdown(
+    modifier: Modifier = Modifier,
+    label: String,
+    setTextFont: (TextFont) -> Unit
+) {
+    val expanded = remember { mutableStateOf(false) }
+
+    Button(onClick = { expanded.value = !expanded.value }) {
+        Text("Text font: $label")
+    }
+
+    DropdownMenu(
+        expanded = expanded.value,
+        onDismissRequest = { expanded.value = false }
+    ) {
+        TextFont.entries.forEach {
+            DropdownMenuItem(
+                text = { Text(it.value) },
+                onClick = {
+                    setTextFont(it)
                     expanded.value = false
                 }
             )

@@ -250,6 +250,10 @@ fun ReaderScreen(
                     TextThemeDropdown(
                         label = uiState.value.textTheme.label
                     ) { viewModel.setTextTheme(it) }
+
+                    TextFontDropdown(
+                        label = uiState.value.textFont.value
+                    ) { viewModel.setTextFont(it) }
                 }
             }
 

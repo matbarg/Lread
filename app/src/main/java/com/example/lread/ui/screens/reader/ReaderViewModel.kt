@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.BookProgress
+import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
@@ -62,7 +63,7 @@ class ReaderViewModel @Inject constructor(
 
         if (chapter == null) { // no chapter was passed => restore book progress or start from the beginning
             viewModelScope.launch {
-                val progress = bookProgressRepository.getBookProgress(book!!.id)
+                val progress = bookProgressRepository.getBookProgress(book!!.id) // todo: clean null check
 
                 _uiState.value = ReaderScreenState(
                     book = book,
@@ -94,6 +95,10 @@ class ReaderViewModel @Inject constructor(
 
     fun setTextTheme(textTheme: TextTheme) {
         _uiState.update { it.copy(textTheme = textTheme) }
+    }
+
+    fun setTextFont(textFont: TextFont) {
+        _uiState.update { it.copy(textFont = textFont) }
     }
 
     fun setCurrentChapter(chapter: Int) {
