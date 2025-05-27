@@ -48,6 +48,7 @@ fun LibraryScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(Color(0xFF8BC34A), Color(0xFFFF9800))

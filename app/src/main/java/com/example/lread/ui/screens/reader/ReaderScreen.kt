@@ -55,8 +55,7 @@ import com.example.lread.utils.ReaderWebViewClient
 fun ReaderScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: ReaderViewModel = hiltViewModel(),
-    bookId: String
+    viewModel: ReaderViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
@@ -116,7 +115,7 @@ fun ReaderScreen(
                                         (webView.contentHeight * webView.scale).toInt()
                                     val maxScroll = adjustedContentHeight - webView.height - 20
 
-                                    if (scrollY >= maxScroll) {
+                                    if (scrollY > oldScrollY && scrollY >= maxScroll) {
                                         viewModel.setNextButtonVisible(true)
                                     } else {
                                         viewModel.setNextButtonVisible(false)

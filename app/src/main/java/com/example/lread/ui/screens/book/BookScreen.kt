@@ -17,23 +17,25 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.ui.draw.shadow
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.lread.ui.navigation.NavRoute
 
 
 @Composable
 fun BookScreen(
     navController: NavController,
-    book: Book,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: BookViewModel = hiltViewModel()
 ) {
-    var readingProgress by remember { mutableStateOf(0.2f) } // 20% gelesen (später dynamisch machen)
+    val uiState = viewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(Color(0xFF8BC34A), Color(0xFFFF9800))
@@ -53,8 +55,8 @@ fun BookScreen(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(text = book.title, style = MaterialTheme.typography.headlineSmall)
-                Text(text = book.author, style = MaterialTheme.typography.bodyMedium)
+                Text(text = uiState.value.book.title, style = MaterialTheme.typography.headlineSmall)
+                Text(text = uiState.value.book.author, style = MaterialTheme.typography.bodyMedium)
             }
         }
 
@@ -62,11 +64,11 @@ fun BookScreen(
 
         // 📈 Reading Progress Bar
         Text(
-            text = "Reading Progress: ${(readingProgress * 100).toInt()}%",
+            text = "Reading Progress: ${(uiState.value.progress * 100).toInt()}%",
             style = MaterialTheme.typography.bodyMedium
         )
         LinearProgressIndicator(
-            progress = readingProgress,
+            progress = uiState.value.progress,
             color = Color.Red,
             trackColor = Color.LightGray,
             modifier = Modifier
@@ -80,12 +82,12 @@ fun BookScreen(
 
         // 🖼 Book Cover
         Image(
-            painter = rememberAsyncImagePainter(model = "file:///android_asset/${book.cover}"),
-            contentDescription = "${book.title} Cover",
+            painter = rememberAsyncImagePainter(model = "file:///android_asset/${uiState.value.book.cover}"),
+            contentDescription = "${uiState.value.book.title} Cover",
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .height(260.dp)
                 .clip(RoundedCornerShape(12.dp))
         )
 
@@ -94,20 +96,43 @@ fun BookScreen(
         // 📖 Chapters
         Text("Chapters", style = MaterialTheme.typography.titleMedium)
 
-        book.chapters.forEachIndexed { index, _ ->
-            Text(
-                text = "Chapter ${index + 1}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .background(Color(0xFFFFECB3), RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-            )
+        LazyColumn(
+            modifier = modifier.height(250.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            items(uiState.value.book.chapters.size) { index ->
+                Button(
+                    modifier = modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 12.dp),
+                    colors = ButtonColors(
+                        containerColor = if (uiState.value.chapter != index) Color.Blue else Color.Red,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.Green,
+                        disabledContentColor = Color.Yellow
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    onClick = {
+                        navController.navigate(
+                            NavRoute.ReaderScreen(
+                                bookId = uiState.value.book.id,
+                                chapter = index
+                            )
+                        )
+                    }) {
+                    Text(
+                        text = "Chapter ${index + 1}",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
         }
 
+        Spacer(modifier = modifier.height(30.dp))
+
         Button(
-            modifier = modifier.shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp)),
+            modifier = modifier
+                .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp))
+                .align(Alignment.CenterHorizontally),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
             colors = ButtonColors(
                 containerColor = Color.Blue,
@@ -117,7 +142,7 @@ fun BookScreen(
             ),
             shape = RoundedCornerShape(16.dp),
             onClick = {
-                navController.navigate(NavRoute.ReaderScreen(bookId = book.id))
+                navController.navigate(NavRoute.ReaderScreen(bookId = uiState.value.book.id))
             }
         ) {
             Row(

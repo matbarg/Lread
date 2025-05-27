@@ -29,27 +29,13 @@ fun Navigation() {
         }
 
         // Book Screen
-        composable<NavRoute.BookScreen> { backStackEntry ->
-            val args = backStackEntry.toRoute<NavRoute.BookScreen>()
-
-            val book = sampleBooks[args.bookId]
-
-            if (book != null) {
-                BookScreen(
-                    navController = navController,
-                    book = book
-                )
-            }
+        composable<NavRoute.BookScreen> {
+            BookScreen(navController = navController)
         }
 
         // Reader Screen
-        composable<NavRoute.ReaderScreen> { backStackEntry ->
-            val args = backStackEntry.toRoute<NavRoute.ReaderScreen>()
-
-            ReaderScreen(
-                navController = navController,
-                bookId = args.bookId
-            )
+        composable<NavRoute.ReaderScreen> {
+            ReaderScreen(navController = navController)
         }
     }
 }
