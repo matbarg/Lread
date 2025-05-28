@@ -16,9 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.lread.data.model.TextFont
+import com.example.lread.data.model.TextSetting
 import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
+import kotlin.enums.EnumEntries
+import kotlin.enums.enumEntries
 
 @Composable
 fun ChapterButtonRow(
@@ -45,96 +48,12 @@ fun ChapterButtonRow(
     }
 }
 
-@Composable
-fun TextSizeDropdown(
-    modifier: Modifier = Modifier,
-    label: String,
-    setTextSize: (TextSize) -> Unit
-) {
-    val expanded = remember { mutableStateOf(false) }
-
-    Button(onClick = { expanded.value = !expanded.value }) {
-        Text("Text size: $label")
-    }
-
-    DropdownMenu(
-        expanded = expanded.value,
-        onDismissRequest = { expanded.value = false }
-    ) {
-        TextSize.entries.forEach {
-            DropdownMenuItem(
-                text = { Text(it.label) },
-                onClick = {
-                    setTextSize(it)
-                    expanded.value = false
-                }
-            )
-        }
-    }
-}
+/**
+ * One generic function for all TextSettings (for that to work they need implement the interface TextSetting)
+ */
 
 @Composable
-fun TextSpacingDropdown(
-    modifier: Modifier = Modifier,
-    label: String,
-    setTextSpacing: (TextSpacing) -> Unit
-) {
-    val expanded = remember { mutableStateOf(false) }
-
-    Button(onClick = { expanded.value = !expanded.value }) {
-        Text("Text spacing: $label")
-    }
-
-    DropdownMenu(
-        expanded = expanded.value,
-        onDismissRequest = { expanded.value = false }
-    ) {
-        TextSpacing.entries.forEach {
-            DropdownMenuItem(
-                text = { Text(it.label) },
-                onClick = {
-                    setTextSpacing(it)
-                    expanded.value = false
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun TextThemeDropdown(
-    modifier: Modifier = Modifier,
-    label: String,
-    setTextTheme: (TextTheme) -> Unit
-) {
-    val expanded = remember { mutableStateOf(false) }
-
-    Button(onClick = { expanded.value = !expanded.value }) {
-        Text("Text size: $label")
-    }
-
-    DropdownMenu(
-        expanded = expanded.value,
-        onDismissRequest = { expanded.value = false }
-    ) {
-        TextTheme.entries.forEach {
-            DropdownMenuItem(
-                text = { Text(it.label) },
-                onClick = {
-                    setTextTheme(it)
-                    expanded.value = false
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun TextFontDropdown(
-    modifier: Modifier = Modifier,
-    label: String,
-    setTextFont: (TextFont) -> Unit
-) {
+fun <T> TextSettingDropdown(modifier: Modifier = Modifier, label: String, items : EnumEntries<T>, setOption: (T) -> Unit) where T : Enum<T>, T : TextSetting {
     val expanded = remember { mutableStateOf(false) }
 
     Button(onClick = { expanded.value = !expanded.value }) {
@@ -145,11 +64,12 @@ fun TextFontDropdown(
         expanded = expanded.value,
         onDismissRequest = { expanded.value = false }
     ) {
-        TextFont.entries.forEach {
+
+        items.forEach {
             DropdownMenuItem(
-                text = { Text(it.value) },
+                text = { Text(it.label) },
                 onClick = {
-                    setTextFont(it)
+                    setOption(it)
                     expanded.value = false
                 }
             )

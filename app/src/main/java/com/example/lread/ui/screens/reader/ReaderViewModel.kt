@@ -58,12 +58,11 @@ class ReaderViewModel @Inject constructor(
      * updates the screen state correspondingly
      */
     private fun initializeReaderState(bookId: String, chapter: Int?) {
-        //val book = getSampleBooks().find { it.id == bookId }
-        val book = sampleBooks[bookId]
+        val book = sampleBooks[bookId] ?: return
 
         if (chapter == null) { // no chapter was passed => restore book progress or start from the beginning
             viewModelScope.launch {
-                val progress = bookProgressRepository.getBookProgress(book!!.id) // todo: clean null check
+                val progress = bookProgressRepository.getBookProgress(book.id)
 
                 _uiState.value = ReaderScreenState(
                     book = book,
@@ -76,7 +75,7 @@ class ReaderViewModel @Inject constructor(
             }
         } else { // chapter was passed => initialize state with it
             _uiState.value = ReaderScreenState(
-                book = book!!,
+                book = book,
                 currentChapter = chapter,
                 currentAnchorId = "" // no scroll
             )
@@ -102,7 +101,6 @@ class ReaderViewModel @Inject constructor(
     }
 
     fun setCurrentChapter(chapter: Int) {
-        // todo: maybe include check if the parameter isn't greater than the total chapters
         _uiState.update { it.copy(currentChapter = chapter, nextButtonVisible = false, settingsVisible = false) }
     }
 

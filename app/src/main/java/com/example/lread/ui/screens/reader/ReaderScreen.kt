@@ -47,6 +47,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.lread.data.model.Book
+import com.example.lread.data.model.TextFont
+import com.example.lread.data.model.TextSize
+import com.example.lread.data.model.TextSpacing
+import com.example.lread.data.model.TextTheme
 import com.example.lread.ui.theme.LReadTheme
 import com.example.lread.utils.ReaderJsBridge
 import com.example.lread.utils.ReaderWebViewClient
@@ -91,7 +95,7 @@ fun ReaderScreen(
                                     getCurrentAnchorId = { uiState.value.currentAnchorId })
                             settings.apply {
                                 javaScriptEnabled = true // js is needed to apply styles based on user events
-                                //setSupportZoom(false) // todo: das hat kurz funktioniert und dann auf einmal nicht mehr ??????????
+                                //setSupportZoom(false) // todo: this setting has weird behaviour; sometimes it works, sometimes not
 
                                 setOnScrollChangeListener { view, scrollX, scrollY, oldScrollX, oldScrollY ->
                                     /**
@@ -238,21 +242,10 @@ fun ReaderScreen(
 
                     Text("Text Display Settings")
 
-                    TextSizeDropdown(
-                        label = uiState.value.textSize.label
-                    ) { viewModel.setTextSize(it) }
-
-                    TextSpacingDropdown(
-                        label = uiState.value.textSpacing.label
-                    ) { viewModel.setTextSpacing(it) }
-
-                    TextThemeDropdown(
-                        label = uiState.value.textTheme.label
-                    ) { viewModel.setTextTheme(it) }
-
-                    TextFontDropdown(
-                        label = uiState.value.textFont.value
-                    ) { viewModel.setTextFont(it) }
+                    TextSettingDropdown(label = uiState.value.textSize.label, items = TextSize.entries) { viewModel.setTextSize(it) }
+                    TextSettingDropdown(label = uiState.value.textSpacing.label, items = TextSpacing.entries) { viewModel.setTextSpacing(it) }
+                    TextSettingDropdown(label = uiState.value.textTheme.label, items = TextTheme.entries) { viewModel.setTextTheme(it) }
+                    TextSettingDropdown(label = uiState.value.textFont.label, items = TextFont.entries) { viewModel.setTextFont(it) }
                 }
             }
 
