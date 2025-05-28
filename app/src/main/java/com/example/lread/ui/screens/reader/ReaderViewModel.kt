@@ -1,7 +1,9 @@
 package com.example.lread.ui.screens.reader
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.dataStore
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -16,11 +18,13 @@ import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
 import com.example.lread.data.model.sampleBooks
 import com.example.lread.data.repository.BookProgressRepository
+import com.example.lread.data.repository.UserPreferencesRepository
 import com.example.lread.ui.navigation.NavRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,7 +32,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val bookProgressRepository: BookProgressRepository
+    private val bookProgressRepository: BookProgressRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _uiState =
@@ -82,26 +87,62 @@ class ReaderViewModel @Inject constructor(
 
             loadingInProgress.value = false
         }
+
+        // restore the text settings
+        viewModelScope.launch {
+            userPreferencesRepository.getUserPreferencesFlow().collect { preferences ->
+                _uiState.update {
+                    it.copy(
+                        textSize = preferences.textSize,
+                        textSpacing = preferences.textSpacing,
+                        textTheme = preferences.textTheme,
+                        textFont = preferences.textFont
+                    )
+                }
+            }
+        }
     }
 
     fun setTextSize(textSize: TextSize) {
         _uiState.update { it.copy(textSize = textSize) }
+
+        viewModelScope.launch {
+            userPreferencesRepository.updateTextSize(textSize)
+        }
     }
 
     fun setTextSpacing(textSpacing: TextSpacing) {
         _uiState.update { it.copy(textSpacing = textSpacing) }
+
+        viewModelScope.launch {
+            userPreferencesRepository.updateTextSpacing(textSpacing)
+        }
     }
 
     fun setTextTheme(textTheme: TextTheme) {
         _uiState.update { it.copy(textTheme = textTheme) }
+
+        viewModelScope.launch {
+            userPreferencesRepository.updateTextTheme(textTheme)
+        }
     }
 
     fun setTextFont(textFont: TextFont) {
         _uiState.update { it.copy(textFont = textFont) }
+
+        viewModelScope.launch {
+            userPreferencesRepository.updateTextFont(textFont)
+        }
     }
 
     fun setCurrentChapter(chapter: Int) {
-        _uiState.update { it.copy(currentChapter = chapter, nextButtonVisible = false, settingsVisible = false) }
+        _uiState.update {
+            it.copy(
+                currentChapter = chapter,
+                nextButtonVisible = false,
+                settingsVisible = false
+            )
+        }
     }
 
     fun goToNextChapter() {

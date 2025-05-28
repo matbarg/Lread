@@ -1,6 +1,10 @@
 package com.example.lread
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import com.example.lread.data.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -20,4 +24,12 @@ object AppModule {
 
     @Provides
     fun provideBookProgressDao(db: AppDatabase) = db.bookProgressDao
+
+    @Provides
+    @Singleton
+    fun providePreferencesDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("user_preferences") }
+        )
+    }
 }
