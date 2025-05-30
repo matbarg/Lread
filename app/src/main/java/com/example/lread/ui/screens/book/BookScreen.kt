@@ -16,11 +16,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.lread.data.model.Book
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.ui.draw.shadow
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.lread.ui.navigation.NavRoute
 
 
@@ -31,6 +32,15 @@ fun BookScreen(
     viewModel: BookViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState()
+
+    val lifeCycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifeCycleOwner) {
+        lifeCycleOwner.lifecycle.addObserver(viewModel)
+        onDispose {
+            lifeCycleOwner.lifecycle.removeObserver(viewModel)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -55,7 +65,10 @@ fun BookScreen(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(text = uiState.value.book.title, style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    text = uiState.value.book.title,
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 Text(text = uiState.value.book.author, style = MaterialTheme.typography.bodyMedium)
             }
         }
@@ -142,6 +155,7 @@ fun BookScreen(
             ),
             shape = RoundedCornerShape(16.dp),
             onClick = {
+                if (uiState.value.bookIsFinished) viewModel.deleteBookProgress() // previous book progress is deleted when "Read again" is clicked
                 navController.navigate(NavRoute.ReaderScreen(bookId = uiState.value.book.id))
             }
         ) {
@@ -149,10 +163,13 @@ fun BookScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text("Continue Reading")
+                val msg =
+                    if (uiState.value.bookIsFirstOpened) "Start reading" else if (uiState.value.bookIsFinished) "Read again" else "Continue reading"
+
+                Text(msg)
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Continue Reading"
+                    imageVector = if (uiState.value.bookIsFinished) Icons.Default.Refresh else Icons.Default.KeyboardArrowRight,
+                    contentDescription = msg
                 )
             }
         }

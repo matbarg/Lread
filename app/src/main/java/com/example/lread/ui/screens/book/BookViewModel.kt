@@ -1,6 +1,7 @@
 package com.example.lread.ui.screens.book
 
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,6 +31,11 @@ class BookViewModel @Inject constructor(
         initializeState(args.bookId)
     }
 
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+        loadBookProgress(_uiState.value.book.id)
+    }
+
     private fun initializeState(bookId: String) {
         // get the Book object from the map
         val book = sampleBooks[bookId]
@@ -40,15 +46,29 @@ class BookViewModel @Inject constructor(
             }
         }
 
-        // get the BookProgress from the db
+        loadBookProgress(bookId)
+    }
+
+    private fun loadBookProgress(bookId: String) {
         viewModelScope.launch {
             val bookProgress = bookProgressRepository.getBookProgress(bookId)
 
             if (bookProgress != null) {
                 _uiState.update {
-                    it.copy(progress = bookProgress.progress, chapter = bookProgress.currentChapter)
+                    it.copy(
+                        progress = bookProgress.progress,
+                        chapter = bookProgress.currentChapter,
+                        bookIsFirstOpened = false,
+                        bookIsFinished = bookProgress.progress == 1f
+                    )
                 }
             }
+        }
+    }
+
+    fun deleteBookProgress() {
+        viewModelScope.launch {
+            bookProgressRepository.deleteBookProgress(uiState.value.book.id)
         }
     }
 }

@@ -24,7 +24,7 @@ data class ReaderScreenState(
     val textFont: TextFont = TextFont.LIBRE_BASKERVILLE,
     val settingsVisible: Boolean = false,
     val topBarVisible: Boolean = true,
-    val nextButtonVisible: Boolean = false,
+    val nextButtonVisible: Boolean = false
 ) {
     val currentChapterURL = "file:///android_asset/${book.chapters.getOrNull(currentChapter)}"
 
@@ -35,4 +35,6 @@ data class ReaderScreenState(
         document.body.style.lineHeight = '${textSpacing.size}';
         document.body.style.color = '${textTheme.textColor}'
     """.trimIndent()
+
+    val onLastChapter = currentChapter == book.chapters.size - 1
 }

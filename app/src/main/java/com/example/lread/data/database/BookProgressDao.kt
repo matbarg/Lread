@@ -19,6 +19,6 @@ interface BookProgressDao {
     @Update
     suspend fun updateBookProgress(bookProgress: BookProgress)
 
-    @Delete
-    suspend fun deleteBookProgress(bookProgress: BookProgress)
+    @Query("DELETE FROM book_progress_table WHERE book_id = :bookId")
+    suspend fun deleteBookProgress(bookId: String)
 }

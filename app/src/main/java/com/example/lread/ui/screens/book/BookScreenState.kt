@@ -12,6 +12,8 @@ val emptyBook = Book(
 
 data class BookScreenState(
     val book: Book = emptyBook,
+    val bookIsFirstOpened: Boolean = true,
+    val bookIsFinished: Boolean = false,
     val progress: Float,
     val chapter: Int?
 )

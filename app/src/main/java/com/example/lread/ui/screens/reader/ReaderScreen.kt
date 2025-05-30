@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -51,6 +52,7 @@ import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
+import com.example.lread.ui.navigation.NavRoute
 import com.example.lread.ui.theme.LReadTheme
 import com.example.lread.utils.ReaderJsBridge
 import com.example.lread.utils.ReaderWebViewClient
@@ -271,17 +273,24 @@ fun ReaderScreen(
                     ),
                     shape = RoundedCornerShape(16.dp),
                     onClick = {
-                        viewModel.goToNextChapter()
+                        if (uiState.value.onLastChapter) {
+                            viewModel.closeBook()
+                            navController.popBackStack()
+                        } else {
+                            viewModel.goToNextChapter()
+                        }
                     }
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Text("Next Chapter")
+                        val msg = if (uiState.value.onLastChapter) "Close book" else "Next chapter"
+
+                        Text(msg)
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Next Chapter"
+                            imageVector = if (uiState.value.onLastChapter) Icons.Default.Close else Icons.Default.KeyboardArrowRight,
+                            contentDescription = msg
                         )
                     }
                 }

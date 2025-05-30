@@ -13,5 +13,5 @@ class BookProgressRepository @Inject constructor(
 
     suspend fun updateBookProgress(bookProgress: BookProgress) = bookProgressDao.updateBookProgress(bookProgress)
 
-    suspend fun deleteBookProgress(bookProgress: BookProgress) = bookProgressDao.deleteBookProgress(bookProgress)
+    suspend fun deleteBookProgress(bookId: String) = bookProgressDao.deleteBookProgress(bookId)
 }

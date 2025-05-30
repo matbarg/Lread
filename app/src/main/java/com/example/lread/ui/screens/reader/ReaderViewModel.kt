@@ -43,6 +43,8 @@ class ReaderViewModel @Inject constructor(
 
     val loadingInProgress = mutableStateOf(true)
 
+    private val bookIsFinished = mutableStateOf(false)
+
     init {
         val args = savedStateHandle.toRoute<NavRoute.ReaderScreen>()
 
@@ -52,7 +54,12 @@ class ReaderViewModel @Inject constructor(
     // progress is saved whenever the app stops (becomes invisible) or when going to the next chapter (in goToNextChapter())
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
-        saveReadingProgress()
+        if (!bookIsFinished.value) saveReadingProgress()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        if (!bookIsFinished.value) saveReadingProgress()
     }
 
     /**
@@ -159,8 +166,6 @@ class ReaderViewModel @Inject constructor(
                     nextButtonVisible = false
                 )
             }
-        } else {
-            // end of book
         }
 
         saveReadingProgress()
@@ -180,6 +185,21 @@ class ReaderViewModel @Inject constructor(
                     currentChapter = _uiState.value.currentChapter,
                     currentAnchorId = _uiState.value.currentAnchorId,
                     progress = _uiState.value.currentChapter / _uiState.value.book.chapters.size.toFloat()
+                )
+            )
+        }
+    }
+
+    fun closeBook() {
+        bookIsFinished.value = true
+
+        viewModelScope.launch {
+            bookProgressRepository.insertBookProgress(
+                BookProgress(
+                    bookId = _uiState.value.book.id,
+                    currentChapter = _uiState.value.book.chapters.size - 1,
+                    currentAnchorId = "",
+                    progress = 1f
                 )
             )
         }
