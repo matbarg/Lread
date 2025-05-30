@@ -27,8 +27,7 @@ enum class TextTheme(
     SOFT_BLACK("Soft Black", "#ffffff", "#282828"),
     BASIC_BLACK("Basic Black", "#ffffff", "#000000"),
     HIGH_CONTRAST("High Contrast", "#ffff00", "#000000"),
-    PAPER("Paper", "#191919", "#f5eec4"),
-    SEPIA("Sepia", "#5b4636", "#f4ecd8"),
+    PAPER("Paper", "#191919", "#faecda"),
     NIGHT_BLUE("Night Blue", "#d9ebfc", "#2b2d4f"),
     DAY_BLUE("Day Blue", "#2b2d4f", "#d9ebfc"),
     GREY("Grey", "#444444", "#dddddd")

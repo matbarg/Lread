@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSize
@@ -22,7 +23,8 @@ data class UserPreferences(
     val textSize: TextSize,
     val textSpacing: TextSpacing,
     val textTheme: TextTheme,
-    val textFont: TextFont
+    val textFont: TextFont,
+    val favBooks: List<String>
 )
 
 /* not needed after automatic datastore dependency injection
@@ -42,6 +44,7 @@ object PreferenceKeys {
     val TEXT_SPACING = stringPreferencesKey("text_spacing")
     val TEXT_THEME = stringPreferencesKey("text_theme")
     val TEXT_FONT = stringPreferencesKey("text_font")
+    val FAV_BOOKS = stringSetPreferencesKey("fav_books") // lists can't be stored but string sets
 }
 
 class UserPreferencesRepository @Inject constructor(
@@ -70,7 +73,8 @@ class UserPreferencesRepository @Inject constructor(
                     } ?: TextTheme.SOFT_BLACK,
                     textFont = preferences[PreferenceKeys.TEXT_FONT]?.let { name ->
                         TextFont.valueOf(name)
-                    } ?: TextFont.LIBRE_BASKERVILLE
+                    } ?: TextFont.LIBRE_BASKERVILLE,
+                    favBooks = preferences[PreferenceKeys.FAV_BOOKS]?.toList() ?: emptyList()
                 )
             }
     }
@@ -96,6 +100,12 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun updateTextFont(textFont: TextFont) {
         dataStore.edit { preferences ->
             preferences[PreferenceKeys.TEXT_FONT] = textFont.name
+        }
+    }
+
+    suspend fun updateFavBooks(favBooks: List<String>) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.FAV_BOOKS] = favBooks.toSet()
         }
     }
 }

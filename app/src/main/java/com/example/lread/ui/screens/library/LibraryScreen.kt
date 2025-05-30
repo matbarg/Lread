@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
@@ -28,7 +29,7 @@ enum class SortType { TITLE, AUTHOR, FAVORITES }
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
-    viewModel: LibraryViewModel = viewModel(),
+    viewModel: LibraryViewModel = hiltViewModel(),
     onBookClick: (Book) -> Unit
 ) {
     val originalBooks = remember { sampleBooks.values.toList() }

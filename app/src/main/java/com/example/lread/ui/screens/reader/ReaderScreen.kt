@@ -41,19 +41,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import com.example.lread.data.model.Book
 import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSize
 import com.example.lread.data.model.TextSpacing
 import com.example.lread.data.model.TextTheme
-import com.example.lread.ui.navigation.NavRoute
-import com.example.lread.ui.theme.LReadTheme
+import com.example.lread.ui.theme.lreadBlue
+import com.example.lread.ui.theme.lreadLightBlue
+import com.example.lread.ui.theme.lreadLightBlueClear
 import com.example.lread.utils.ReaderJsBridge
 import com.example.lread.utils.ReaderWebViewClient
 
@@ -74,10 +74,6 @@ fun ReaderScreen(
         }
     }
 
-    // todo: move colors to viewmodel
-    val color1 = Color(0xFF7BA3FF)
-    val color2 = Color(0xFF0E5CFD)
-
     Scaffold { innerPadding ->
         Box(
             modifier = modifier
@@ -85,7 +81,6 @@ fun ReaderScreen(
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-
             // rendering the webview needs to wait until the BookProgress was fetched from the db
             if (!viewModel.loadingInProgress.value) {
                 AndroidView(
@@ -96,7 +91,8 @@ fun ReaderScreen(
                                 ReaderWebViewClient(getJsStyles = { uiState.value.currentStylesScript },
                                     getCurrentAnchorId = { uiState.value.currentAnchorId })
                             settings.apply {
-                                javaScriptEnabled = true // js is needed to apply styles based on user events
+                                javaScriptEnabled =
+                                    true // js is needed to apply styles based on user events
                                 //setSupportZoom(false) // todo: this setting has weird behaviour; sometimes it works, sometimes not
 
                                 setOnScrollChangeListener { view, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -104,7 +100,7 @@ fun ReaderScreen(
                                      * Logic to toggle the top bar:
                                      * becomes invisible when scrolling down and visible again when scrolling upwards
                                      */
-                                    if (scrollY > oldScrollY) {
+                                    if (scrollY > oldScrollY && !uiState.value.settingsVisible) {
                                         viewModel.setTopBarVisible(false)
                                     } else {
                                         viewModel.setTopBarVisible(true)
@@ -154,7 +150,7 @@ fun ReaderScreen(
              * (It's not the Scaffolds topBar directly because it acts more as an overlay)
              */
             val topBackgroundColor = animateColorAsState(
-                targetValue = if (uiState.value.topBarVisible) color1 else Color(0x007BA3FF),
+                targetValue = if (uiState.value.topBarVisible) lreadLightBlue else lreadLightBlueClear,
                 animationSpec = tween(durationMillis = 300),
             )
 
@@ -170,12 +166,13 @@ fun ReaderScreen(
                         .align(Alignment.CenterStart)
                         .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
-                        .background(color2),
+                        .background(lreadBlue),
                     onClick = { navController.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
+                        tint = Color.White
                     )
                 }
 
@@ -200,15 +197,16 @@ fun ReaderScreen(
                         .align(Alignment.CenterEnd)
                         .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
-                        .background(color2),
+                        .background(lreadBlue),
                     onClick = {
                         viewModel.toggleSettings()
                         viewModel.setTopBarVisible(true)
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = "Toggle Settings"
+                        imageVector = if (uiState.value.settingsVisible) Icons.Default.Close else Icons.Default.Menu,
+                        contentDescription = "Toggle Settings",
+                        tint = Color.White
                     )
                 }
             }
@@ -228,7 +226,7 @@ fun ReaderScreen(
                         .padding(horizontal = 15.dp, vertical = 90.dp)
                         .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
-                        .background(color1)
+                        .background(lreadLightBlue)
                         .padding(20.dp)
                 ) {
                     Text("Select Chapter")
@@ -244,10 +242,29 @@ fun ReaderScreen(
 
                     Text("Text Display Settings")
 
-                    TextSettingDropdown(label = uiState.value.textSize.label, items = TextSize.entries) { viewModel.setTextSize(it) }
-                    TextSettingDropdown(label = uiState.value.textSpacing.label, items = TextSpacing.entries) { viewModel.setTextSpacing(it) }
-                    TextSettingDropdown(label = uiState.value.textTheme.label, items = TextTheme.entries) { viewModel.setTextTheme(it) }
-                    TextSettingDropdown(label = uiState.value.textFont.label, items = TextFont.entries) { viewModel.setTextFont(it) }
+                    TextSettingDropdown(
+                        buttonText = "Text size",
+                        currentValueText = uiState.value.textSize.label,
+                        items = TextSize.entries
+                    ) { viewModel.setTextSize(it) }
+
+                    TextSettingDropdown(
+                        buttonText = "Text spacing",
+                        currentValueText = uiState.value.textSpacing.label,
+                        items = TextSpacing.entries
+                    ) { viewModel.setTextSpacing(it) }
+
+                    TextSettingDropdown(
+                        buttonText = "Text theme",
+                        currentValueText = uiState.value.textTheme.label,
+                        items = TextTheme.entries
+                    ) { viewModel.setTextTheme(it) }
+
+                    TextSettingDropdown(
+                        buttonText = "Text font",
+                        currentValueText = uiState.value.textFont.label,
+                        items = TextFont.entries
+                    ) { viewModel.setTextFont(it) }
                 }
             }
 
@@ -259,14 +276,21 @@ fun ReaderScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 100.dp),
                 visible = uiState.value.nextButtonVisible,
-                enter = fadeIn(animationSpec = tween(durationMillis = 500)) + slideInVertically(animationSpec = tween(durationMillis = 500), initialOffsetY = { it / 2 }),
-                exit = fadeOut(animationSpec = tween(durationMillis = 100)) + slideOutVertically(animationSpec = tween(durationMillis = 100), targetOffsetY = { it / 4 })
+                enter = fadeIn(animationSpec = tween(durationMillis = 500)) + slideInVertically(
+                    animationSpec = tween(durationMillis = 500),
+                    initialOffsetY = { it / 2 }),
+                exit = fadeOut(animationSpec = tween(durationMillis = 100)) + slideOutVertically(
+                    animationSpec = tween(durationMillis = 100),
+                    targetOffsetY = { it / 4 })
             ) {
                 Button(
-                    modifier = modifier.shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp)),
+                    modifier = modifier.shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
                     colors = ButtonColors(
-                        containerColor = color2,
+                        containerColor = lreadBlue,
                         contentColor = Color.White,
                         disabledContainerColor = Color.Green,
                         disabledContentColor = Color.Yellow

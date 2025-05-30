@@ -2,6 +2,8 @@ package com.example.lread.ui.screens.reader
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -14,14 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSetting
-import com.example.lread.data.model.TextSize
-import com.example.lread.data.model.TextSpacing
-import com.example.lread.data.model.TextTheme
+import com.example.lread.ui.theme.lreadBlue
+import com.example.lread.ui.theme.lreadRed
 import kotlin.enums.EnumEntries
-import kotlin.enums.enumEntries
 
 @Composable
 fun ChapterButtonRow(
@@ -36,7 +36,7 @@ fun ChapterButtonRow(
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(vertical = 5.dp, horizontal = 12.dp),
                 colors = ButtonColors(
-                    containerColor = if (i != currentChapter) Color.Blue else Color.Red,
+                    containerColor = if (i != currentChapter) lreadBlue else lreadRed,
                     contentColor = Color.White,
                     disabledContainerColor = Color.Green,
                     disabledContentColor = Color.Yellow
@@ -53,18 +53,36 @@ fun ChapterButtonRow(
  */
 
 @Composable
-fun <T> TextSettingDropdown(modifier: Modifier = Modifier, label: String, items : EnumEntries<T>, setOption: (T) -> Unit) where T : Enum<T>, T : TextSetting {
+fun <T> TextSettingDropdown(
+    modifier: Modifier = Modifier,
+    buttonText: String,
+    currentValueText: String,
+    items: EnumEntries<T>,
+    setOption: (T) -> Unit
+) where T : Enum<T>, T : TextSetting {
     val expanded = remember { mutableStateOf(false) }
 
-    Button(onClick = { expanded.value = !expanded.value }) {
-        Text("Text font: $label")
+    Button(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonColors(
+            containerColor = lreadBlue,
+            contentColor = Color.White,
+            disabledContainerColor = Color.Green,
+            disabledContentColor = Color.Yellow
+        ),
+        onClick = { expanded.value = !expanded.value }
+    ) {
+        Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(buttonText)
+            Text(text = currentValueText, fontWeight = FontWeight.Bold)
+        }
     }
 
     DropdownMenu(
         expanded = expanded.value,
         onDismissRequest = { expanded.value = false }
     ) {
-
         items.forEach {
             DropdownMenuItem(
                 text = { Text(it.label) },
