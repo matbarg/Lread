@@ -167,5 +167,14 @@ fun BookCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        Text(
+            text = book.author,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.DarkGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
+
