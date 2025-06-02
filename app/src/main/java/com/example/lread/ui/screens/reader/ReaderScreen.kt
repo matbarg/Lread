@@ -26,8 +26,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -35,17 +37,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.lread.data.model.TextFont
 import com.example.lread.data.model.TextSize
@@ -63,7 +68,7 @@ fun ReaderScreen(
     navController: NavController,
     viewModel: ReaderViewModel = hiltViewModel()
 ) {
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     val lifeCycleOwner = LocalLifecycleOwner.current
 
@@ -81,38 +86,26 @@ fun ReaderScreen(
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            // rendering the webview needs to wait until the BookProgress was fetched from the db
             if (!viewModel.loadingInProgress.value) {
                 AndroidView(
                     modifier = modifier.fillMaxSize(),
                     factory = {
                         WebView(it).apply {
                             webViewClient =
-                                ReaderWebViewClient(getJsStyles = { uiState.value.currentStylesScript },
-                                    getCurrentAnchorId = { uiState.value.currentAnchorId })
+                                ReaderWebViewClient(
+                                    getJsStyles = { uiState.currentStylesScript },
+                                    getCurrentAnchorId = { uiState.currentAnchorId }
+                                )
                             settings.apply {
-                                javaScriptEnabled =
-                                    true // js is needed to apply styles based on user events
-                                //setSupportZoom(false) // todo: this setting has weird behaviour; sometimes it works, sometimes not
-
+                                javaScriptEnabled = true
                                 setOnScrollChangeListener { view, scrollX, scrollY, oldScrollX, oldScrollY ->
-                                    /**
-                                     * Logic to toggle the top bar:
-                                     * becomes invisible when scrolling down and visible again when scrolling upwards
-                                     */
-                                    if (scrollY > oldScrollY && !uiState.value.settingsVisible) {
+                                    if (scrollY > oldScrollY && !uiState.settingsVisible) {
                                         viewModel.setTopBarVisible(false)
                                     } else {
                                         viewModel.setTopBarVisible(true)
                                     }
 
-                                    /**
-                                     * Logic to toggle the next chapter button when the user has fully scrolled down:
-                                     * The content height needs to be adjusted with the scale, this makes the value comparable to scrollY
-                                     * To find out the max scroll the (visible) height of the web view is subtracted,
-                                     * the additional - 20 acts as a buffer for floating imprecisions and to make it a bit smoother
-                                     */
-                                    val webView = view as WebView // casts the view to a webview
+                                    val webView = view as WebView
                                     val adjustedContentHeight =
                                         (webView.contentHeight * webView.scale).toInt()
                                     val maxScroll = adjustedContentHeight - webView.height - 20
@@ -125,19 +118,21 @@ fun ReaderScreen(
                                 }
                             }
 
-                            // enables the callback to set the current anchorId from inside the webView
                             addJavascriptInterface(ReaderJsBridge { anchorId ->
                                 viewModel.setCurrentAnchorId(anchorId)
                             }, "ReaderBridge")
 
-                            loadUrl(uiState.value.currentChapterURL)
+                            loadUrl(uiState.currentChapterURL)
                         }
                     },
                     update = { webView ->
-                        if (webView.url != uiState.value.currentChapterURL) { // prevents the webView from reloading if only the css was changed
-                            webView.loadUrl(uiState.value.currentChapterURL)
+                        if (webView.url != uiState.currentChapterURL) {
+                            webView.loadUrl(uiState.currentChapterURL)
                         } else {
-                            webView.evaluateJavascript(uiState.value.currentStylesScript, null)
+                            // Only evaluate JS styles if the URL hasn't changed to avoid re-applying on new chapter load
+                            // The webViewClient.onPageFinished handles initial styles and fonts.
+                            // This update block ensures style changes are applied without reloading the whole page.
+                            webView.evaluateJavascript(uiState.currentStylesScript, null)
                         }
                     }
                 )
@@ -145,22 +140,18 @@ fun ReaderScreen(
                 CircularProgressIndicator(modifier = modifier.align(Alignment.Center))
             }
 
-            /**
-             * Top bar:
-             * (It's not the Scaffolds topBar directly because it acts more as an overlay)
-             */
-            val topBackgroundColor = animateColorAsState(
-                targetValue = if (uiState.value.topBarVisible) lreadLightBlue else lreadLightBlueClear,
+            val topBackgroundColor by animateColorAsState(
+                targetValue = if (uiState.topBarVisible) lreadLightBlue else lreadLightBlueClear,
                 animationSpec = tween(durationMillis = 300),
+                label = "topBackgroundColorAnimation"
             )
 
             Box(
                 modifier = modifier
                     .fillMaxWidth()
-                    .background(topBackgroundColor.value)
+                    .background(topBackgroundColor)
                     .padding(15.dp),
             ) {
-                // Back button
                 IconButton(
                     modifier = modifier
                         .align(Alignment.CenterStart)
@@ -176,22 +167,20 @@ fun ReaderScreen(
                     )
                 }
 
-                // Center text with title and author
                 AnimatedVisibility(
                     modifier = modifier.align(Alignment.Center),
-                    visible = uiState.value.topBarVisible,
+                    visible = uiState.topBarVisible,
                     enter = fadeIn(animationSpec = tween(durationMillis = 300)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 300))
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = uiState.value.book.title, fontWeight = FontWeight.Bold)
-                        Text(text = uiState.value.book.author)
+                        Text(text = uiState.book.title, fontWeight = FontWeight.Bold)
+                        Text(text = uiState.book.author)
                     }
                 }
 
-                // Toggle settings button
                 IconButton(
                     modifier = modifier
                         .align(Alignment.CenterEnd)
@@ -200,25 +189,23 @@ fun ReaderScreen(
                         .background(lreadBlue),
                     onClick = {
                         viewModel.toggleSettings()
-                        viewModel.setTopBarVisible(true)
+                        viewModel.setTopBarVisible(true) // Ensure top bar is visible when settings toggle
                     }
                 ) {
                     Icon(
-                        imageVector = if (uiState.value.settingsVisible) Icons.Default.Close else Icons.Default.Menu,
+                        imageVector = if (uiState.settingsVisible) Icons.Default.Close else Icons.Default.Menu,
                         contentDescription = "Toggle Settings",
                         tint = Color.White
                     )
                 }
             }
 
-            /**
-             * Settings panel
-             */
             AnimatedVisibility(
-                visible = uiState.value.settingsVisible,
+                visible = uiState.settingsVisible,
                 enter = fadeIn(animationSpec = tween(durationMillis = 300)),
                 exit = fadeOut(animationSpec = tween(durationMillis = 300))
             ) {
+                var dropdownExpanded by remember { mutableStateOf(false) } // State for the music dropdown
                 Column(
                     modifier = modifier
                         .align(Alignment.TopCenter)
@@ -232,8 +219,8 @@ fun ReaderScreen(
                     Text("Select Chapter")
 
                     ChapterButtonRow(
-                        currentChapter = uiState.value.currentChapter,
-                        totalChapters = uiState.value.book.chapters.size
+                        currentChapter = uiState.currentChapter,
+                        totalChapters = uiState.book.chapters.size
                     ) {
                         viewModel.setCurrentChapter(it)
                     }
@@ -244,60 +231,81 @@ fun ReaderScreen(
 
                     TextSettingDropdown(
                         buttonText = "Text size",
-                        currentValueText = uiState.value.textSize.label,
+                        currentValueText = uiState.textSize.label,
                         items = TextSize.entries
                     ) { viewModel.setTextSize(it) }
 
                     TextSettingDropdown(
                         buttonText = "Text spacing",
-                        currentValueText = uiState.value.textSpacing.label,
+                        currentValueText = uiState.textSpacing.label,
                         items = TextSpacing.entries
                     ) { viewModel.setTextSpacing(it) }
 
                     TextSettingDropdown(
                         buttonText = "Text theme",
-                        currentValueText = uiState.value.textTheme.label,
+                        currentValueText = uiState.textTheme.label,
                         items = TextTheme.entries
                     ) { viewModel.setTextTheme(it) }
 
                     TextSettingDropdown(
                         buttonText = "Text font",
-                        currentValueText = uiState.value.textFont.label,
+                        currentValueText = uiState.textFont.label,
                         items = TextFont.entries
                     ) { viewModel.setTextFont(it) }
+
+                    Spacer(Modifier.height(12.dp))
+                    Text("Background Music")
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Button(onClick = {
+                            viewModel.setMusicEnabled(!uiState.isMusicEnabled)
+                        }) {
+                            Text(if (uiState.isMusicEnabled) "Pause Music" else "Play Music")
+                        }
+
+                        // Button to open song selection dropdown
+                        Button(onClick = { dropdownExpanded = true }) {
+                            Text(uiState.selectedTrack) // Show currently selected track name
+                        }
+
+                        DropdownMenu(
+                            expanded = dropdownExpanded,
+                            onDismissRequest = { dropdownExpanded = false }
+                        ) {
+                            // IMPORTANT: These display names must match the 'when' conditions in ReaderViewModel
+                            listOf("Lo-fi Vibes", "Rainy Calm", "Reading Flow").forEach { name ->
+                                DropdownMenuItem(
+                                    text = { Text(name) },
+                                    onClick = {
+                                        viewModel.setSelectedTrack(name)
+                                        dropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
-            /**
-             * Next chapter button
-             */
+            // Next Chapter Button
             AnimatedVisibility(
-                modifier = modifier
+                modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 100.dp),
-                visible = uiState.value.nextButtonVisible,
-                enter = fadeIn(animationSpec = tween(durationMillis = 500)) + slideInVertically(
-                    animationSpec = tween(durationMillis = 500),
-                    initialOffsetY = { it / 2 }),
-                exit = fadeOut(animationSpec = tween(durationMillis = 100)) + slideOutVertically(
-                    animationSpec = tween(durationMillis = 100),
-                    targetOffsetY = { it / 4 })
+                visible = uiState.nextButtonVisible,
+                enter = fadeIn(tween(500)) + slideInVertically(tween(500)) { it / 2 },
+                exit = fadeOut(tween(100)) + slideOutVertically(tween(100)) { it / 4 }
             ) {
                 Button(
-                    modifier = modifier.shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(16.dp)
-                    ),
+                    modifier = Modifier.shadow(12.dp, RoundedCornerShape(16.dp)),
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
-                    colors = ButtonColors(
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = lreadBlue,
-                        contentColor = Color.White,
-                        disabledContainerColor = Color.Green,
-                        disabledContentColor = Color.Yellow
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(16.dp),
                     onClick = {
-                        if (uiState.value.onLastChapter) {
+                        if (uiState.onLastChapter) {
                             viewModel.closeBook()
                             navController.popBackStack()
                         } else {
@@ -305,16 +313,13 @@ fun ReaderScreen(
                         }
                     }
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        val msg = if (uiState.value.onLastChapter) "Close book" else "Next chapter"
-
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val msg = if (uiState.onLastChapter) "Close Book" else "Next Chapter"
                         Text(msg)
                         Icon(
-                            imageVector = if (uiState.value.onLastChapter) Icons.Default.Close else Icons.Default.KeyboardArrowRight,
-                            contentDescription = msg
+                            imageVector = if (uiState.onLastChapter)
+                                Icons.Default.Close else Icons.Default.KeyboardArrowRight,
+                            contentDescription = null
                         )
                     }
                 }
