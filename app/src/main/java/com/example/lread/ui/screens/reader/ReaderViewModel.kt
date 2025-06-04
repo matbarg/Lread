@@ -72,7 +72,7 @@ class ReaderViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     book = book,
                     currentChapter = progress?.currentChapter ?: 0,
-                    currentAnchorId = progress?.currentAnchorId ?: "para-0"
+                    currentAnchorId = progress?.currentAnchorId ?: ""
                 )
                 loadingInProgress.value = false
             }
@@ -80,7 +80,7 @@ class ReaderViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(
                 book = book,
                 currentChapter = chapter,
-                currentAnchorId = "para-0"
+                currentAnchorId = ""
             )
             loadingInProgress.value = false
         }
@@ -123,7 +123,7 @@ class ReaderViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 currentChapter = chapter,
-                currentAnchorId = "para-0",
+                currentAnchorId = "",
                 nextButtonVisible = false,
                 settingsVisible = false
             )
@@ -138,7 +138,7 @@ class ReaderViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     currentChapter = current + 1,
-                    currentAnchorId = "para-0",
+                    currentAnchorId = "",
                     settingsVisible = false,
                     topBarVisible = true,
                     nextButtonVisible = false

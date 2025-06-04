@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lread.data.model.TextSetting
 import com.example.lread.ui.theme.lreadBlue
-import com.example.lread.ui.theme.lreadRed
+import com.example.lread.ui.theme.lreadPurple
 import kotlin.enums.EnumEntries
 
 @Composable
@@ -36,7 +36,7 @@ fun ChapterButtonRow(
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(vertical = 5.dp, horizontal = 12.dp),
                 colors = ButtonColors(
-                    containerColor = if (i != currentChapter) lreadBlue else lreadRed,
+                    containerColor = if (i != currentChapter) lreadBlue else lreadPurple,
                     contentColor = Color.White,
                     disabledContainerColor = Color.Green,
                     disabledContentColor = Color.Yellow

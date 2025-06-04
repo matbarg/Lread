@@ -1,6 +1,5 @@
 package com.example.lread.utils
 
-import android.graphics.Bitmap
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
@@ -20,8 +19,11 @@ class ReaderWebViewClient(
             })();
         """.trimIndent()
 
-    private val addSpacing = """
+    private val addLayoutStyles = """
+        document.documentElement.setAttribute("lang", "en");
         document.body.style.padding = '80px 16px 200px';
+        document.body.style.textAlign = 'justify';
+        document.body.style.hyphens = "auto";
     """.trimIndent()
 
     private val addFontFamilies = """
@@ -106,7 +108,7 @@ class ReaderWebViewClient(
 
         view?.evaluateJavascript(addIdsJs, null)
 
-        view?.evaluateJavascript(addSpacing, null)
+        view?.evaluateJavascript(addLayoutStyles, null)
 
         view?.evaluateJavascript(addFontFamilies, null)
 

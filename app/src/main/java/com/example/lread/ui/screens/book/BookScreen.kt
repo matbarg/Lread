@@ -24,7 +24,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.lread.ui.navigation.NavRoute
 import com.example.lread.ui.theme.lreadBlue
-import com.example.lread.ui.theme.lreadRed
+import com.example.lread.ui.theme.lreadLightBlue
+import com.example.lread.ui.theme.lreadPurpleTranslucent
+import com.example.lread.ui.theme.lreadPurple
 
 
 @Composable
@@ -50,7 +52,7 @@ fun BookScreen(
             .systemBarsPadding()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF8BC34A), Color(0xFFFF9800))
+                    colors = listOf(lreadLightBlue, lreadPurpleTranslucent)
                 )
             )
             .padding(16.dp)
@@ -84,7 +86,7 @@ fun BookScreen(
         )
         LinearProgressIndicator(
             progress = uiState.value.progress,
-            color = lreadRed,
+            color = lreadPurple,
             trackColor = Color.LightGray,
             modifier = Modifier
                 .height(25.dp)
@@ -120,7 +122,7 @@ fun BookScreen(
                     modifier = modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(horizontal = 5.dp, vertical = 12.dp),
                     colors = ButtonColors(
-                        containerColor = if (uiState.value.chapter != index) lreadBlue else lreadRed,
+                        containerColor = if (uiState.value.chapter != index) lreadBlue else lreadPurple,
                         contentColor = Color.White,
                         disabledContainerColor = Color.Green,
                         disabledContentColor = Color.Yellow

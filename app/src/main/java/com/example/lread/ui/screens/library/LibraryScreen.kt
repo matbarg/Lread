@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -19,10 +18,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.lread.data.model.Book
 import com.example.lread.data.model.sampleBooks
+import com.example.lread.ui.theme.lreadLightBlue
+import com.example.lread.ui.theme.lreadPurpleTranslucent
 
 enum class SortType { TITLE, AUTHOR, FAVORITES }
 
@@ -52,7 +52,7 @@ fun LibraryScreen(
             .systemBarsPadding()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF8BC34A), Color(0xFFFF9800))
+                    colors = listOf(lreadLightBlue, lreadPurpleTranslucent)
                 )
             )
     ) {
